@@ -1,8 +1,17 @@
 var fetch = require('node-fetch')
+var redis = require('redis');
+client = redis.createClient();
+
+const { promisify } = require("util");
+
+//const getAsync = promisify(client.get).bind(client);
+const setAsync = promisify(client.set).bind(client);
+ 
 
 const baseURL = 'https://jobs.github.com/positions.json'
 
 async function fetchGithub() {
+    console.log('fetching github');
 
     let resultCount = 1;
     let page = 0;
@@ -18,6 +27,9 @@ async function fetchGithub() {
 
     }
     console.log('Pulled ' + jobsArray.length, " jobs");
+    const success = await setAsync('github', JSON.stringify(jobsArray)) 
+
+    console.log({success})
 }
 
 fetchGithub();
