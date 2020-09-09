@@ -3,8 +3,6 @@ var redis = require('redis');
 client = redis.createClient();
 
 const { promisify } = require("util");
-
-//const getAsync = promisify(client.get).bind(client);
 const setAsync = promisify(client.set).bind(client);
  
 
@@ -17,6 +15,7 @@ async function fetchGithub() {
     let page = 0;
     const jobsArray = [];
 
+    //fetch all pages
     while(resultCount > 0) {
         const res = await fetch(`${baseURL}?page=${page}`);
         const jobs = await res.json();
@@ -26,8 +25,27 @@ async function fetchGithub() {
         page ++;
 
     }
+
     console.log('Pulled ' + jobsArray.length, " jobs");
-    const success = await setAsync('github', JSON.stringify(jobsArray)) 
+    //filter out non-junior positions
+    const jrJobs = jobsArray.filter(job => {
+        const jobTitle = job.title.toLowerCase();
+
+        //algo logic
+        if (
+            jobTitle.includes('senior') ||
+            jobTitle.includes('sr.') ||
+            jobTitle.includes('architect') ||
+            jobTitle.includes('manager')
+            ) {
+                return false;
+            }
+        return true;
+    })
+    console.log('filtered down to ' + jrJobs.length + ' junior jobs')
+
+    //set in redis
+    const success = await setAsync('github', JSON.stringify(jrJobs)) 
 
     console.log({success})
 }
