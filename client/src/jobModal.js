@@ -44,7 +44,7 @@ export default function JobModal({job, open, handleClose}) {
           <Button onClick={handleClose} color="primary">
             Close
           </Button>
-          <a href={job.url} target="_blank">
+          <a href={job.url} target="_blank" rel="noopener noreferrer">
           <Button  color="primary">
             Apply
           </Button>
